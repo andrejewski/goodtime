@@ -1,0 +1,24 @@
+{
+  "name": "goodtime",
+  "version": "0.0.1",
+  "description": "is it a good time?",
+  "main": "index.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrejewski/goodtime.git"
+  },
+  "keywords": [
+    "good",
+    "time",
+    "date"
+  ],
+  "author": "Chris Andrejewski <christopher.andrejewski@gmail.com> (http://chrisandrejewski.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andrejewski/goodtime/issues"
+  },
+  "homepage": "https://github.com/andrejewski/goodtime#readme"
+}

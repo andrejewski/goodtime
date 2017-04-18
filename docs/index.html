@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+<head>
+  <title>Good Time</title>
+  <style>
+    #app {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding-bottom: 40px;
+
+      font-family: Helvetica, Arial, sans-serif;
+      background: #1e5799;
+      background: -moz-linear-gradient(-45deg, #1e5799 0%, #6f5aa8 100%);
+      background: -webkit-linear-gradient(-45deg, #1e5799 0%,#6f5aa8 100%);
+      background: linear-gradient(135deg, #1e5799 0%,#6f5aa8 100%);
+      filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#6f5aa8',GradientType=1 );
+    }
+
+    #curr {
+      font-size: 6em;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    #date {display: none;}
+
+    #time, #next div {
+      color: #fff;
+      opacity: 0.4;
+      text-shadow: 0 0 3px rgba(0,0,0,0.1);
+      transition: all 0.5s linear;
+    }
+
+    #time.good, #next .good {
+      opacity: 1;
+      text-shadow: 0 0 3px rgba(0,0,0,0.3);
+    }
+
+    #next-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-size: 1.2em;
+    }
+
+    #next {
+      columns: 5;
+      text-align: center;
+    }
+
+    #next div {
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id='app'>
+    <div id='curr'>
+      <div id='date'></div>
+      <div id='time'>Good Time</div>
+    </div>
+    <div id='next-container'>
+      <div id='next'></div>
+    </div>
+  </div>
+
+  <script>
+    function pad(len, char, str) {
+      str = '' + str
+      while(str.length < len) str = char + str
+      return str
+    }
+
+    function formatDate (date) {
+      return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`
+    }
+
+    function humanHour (date) {
+      let hour = date.getHours() % 12
+      if (!hour) {
+        hour = 12
+      }
+      return hour
+    }
+
+    function formatTime (date) {
+      let hour = date.getHours() % 12
+      if (!hour) {
+        hour = 12
+      }
+      return `${pad(2, '0', humanHour(date))}:${pad(2, '0', date.getMinutes())}:${pad(2, '0', date.getSeconds())}`
+    }
+
+    function setClass (el, className, add) {
+      if (add) {
+        el.classList.add(className)
+      } else {
+        el.classList.remove(className)
+      }
+    }
+
+    function isGoodDate () {
+      // TODO
+    }
+
+    function isExactHour (date) {
+      return date.getMinutes() === 0
+    }
+
+    function isMod5Minute (date) {
+      return date.getMinutes() % 5 === 0
+    }
+
+    function isHourMinute (date) {
+      return humanHour(date) === date.getMinutes()
+    }
+
+    function tens (num) {
+      return Math.floor(num / 10)
+    }
+
+    function ones (num) {
+      return num % 10
+    }
+
+    function isMinuteTwoSameNumbers (date) {
+      const minutes = date.getMinutes()
+      return tens(minutes) === ones(minutes)
+    }
+
+    function isIncremental (date) {
+      const first = tens(humanHour(date))
+      const second = ones(humanHour(date))
+      const third = tens(date.getMinutes())
+      const fourth = ones(date.getMinutes())
+      if (first) {
+        return (first + 1) === second && (second + 1) === third && (third + 1) === fourth
+      } else {
+        return (second + 1) === third && (third + 1) === fourth
+      }
+    }
+
+    function sumsTo2N (date) {
+      const sum = humanHour(date) + date.getMinutes()
+      return Math.log2(sum) === Math.floor(Math.log2(sum))
+    }
+
+    function concatTo2N (date) {
+      const sum = parseInt(humanHour(date) + '' + date.getMinutes(), 10)
+      return Math.log2(sum) === Math.floor(Math.log2(sum))
+    }
+
+    const timeRules = [
+      // () => true,
+      isExactHour,
+      isMod5Minute,
+      isHourMinute,
+      isMinuteTwoSameNumbers,
+      isIncremental,
+      sumsTo2N,
+      concatTo2N
+    ]
+
+    function isGoodTime (date) {
+      return timeRules.some(rule => rule(date))
+    }
+
+    const $date = document.querySelector('#date')
+    const $time = document.querySelector('#time')
+    const $next = document.querySelector('#next')
+
+    const nextTimeCount = 30
+    function buildNextTimes (date) {
+      let str = ''
+      let i = 0
+      while (i < nextTimeCount) {
+        const next = new Date(date.getTime() + ((i + 1) * 60 * 1000))
+        const time = formatTime(next)
+        const className = isGoodTime(next) ? 'class="good"' : ''
+        str += `<div ${className}>${time.slice(0, -3)}</div>`
+        i++
+      }
+      return str
+    }
+
+    setInterval(() => {
+      const date = new Date()
+      $date.innerText = formatDate(date)
+      setClass($date, 'good', isGoodDate(date))
+
+      $time.innerText = formatTime(date)
+      setClass($time, 'good', isGoodTime(date))
+
+      $next.innerHTML = buildNextTimes(date)
+    }, 500)
+  </script>
+</body>
+</html>
